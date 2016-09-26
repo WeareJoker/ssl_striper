@@ -36,18 +36,18 @@ import sys, getopt, logging, traceback, string, os
 gVersion = "0.9"
 
 def usage():
-    print "\nsslstrip " + gVersion + " by Moxie Marlinspike"
-    print "Usage: sslstrip <options>\n"
-    print "Options:"
-    print "-w <filename>, --write=<filename> Specify file to log to (optional)."
-    print "-p , --post                       Log only SSL POSTs. (default)"
-    print "-s , --ssl                        Log all SSL traffic to and from server."
-    print "-a , --all                        Log all SSL and HTTP traffic to and from server."
-    print "-l <port>, --listen=<port>        Port to listen on (default 10000)."
-    print "-f , --favicon                    Substitute a lock favicon on secure requests."
-    print "-k , --killsessions               Kill sessions in progress."
-    print "-h                                Print this help message."
-    print ""
+    print("\nsslstrip " + gVersion + " by Moxie Marlinspike")
+    print("Usage: sslstrip <options>\n")
+    print("Options:")
+    print("-w <filename>, --write=<filename> Specify file to log to (optional).")
+    print("-p , --post                       Log only SSL POSTs. (default)")
+    print("-s , --ssl                        Log all SSL traffic to and from server.")
+    print("-a , --all                        Log all SSL and HTTP traffic to and from server.")
+    print("-l <port>, --listen=<port>        Port to listen on (default 10000).")
+    print("-f , --favicon                    Substitute a lock favicon on secure requests.")
+    print("-k , --killsessions               Kill sessions in progress.")
+    print("-h                                print this help message.")
+    print("")
 
 def parseOptions(argv):
     logFile      = 'sslstrip.log'
@@ -92,7 +92,7 @@ def main(argv):
     logging.basicConfig(level=logLevel, format='%(asctime)s %(message)s',
                         filename=logFile, filemode='w')
 
-    URLMonitor.getInstance().setFaviconSpoofing(spoofFavicon)
+    URLMonitor.getInstance.setFaviconSpoofing(spoofFavicon)
     CookieCleaner.getInstance().setEnabled(killSessions)
 
     strippingFactory              = http.HTTPFactory(timeout=10)
@@ -100,7 +100,7 @@ def main(argv):
 
     reactor.listenTCP(int(listenPort), strippingFactory)
                 
-    print "\nsslstrip " + gVersion + " by Moxie Marlinspike running..."
+    print("\nsslstrip " + gVersion + " by Moxie Marlinspike running..."
 
     reactor.run()
 

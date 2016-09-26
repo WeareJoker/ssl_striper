@@ -1,11 +1,9 @@
-
-class DnsCache:    
-
-    '''
+class DnsCache:
+    """
     The DnsCache maintains a cache of DNS lookups, mirroring the browser experience.
-    '''
+    """
 
-    _instance          = None
+    _instance = None
 
     def __init__(self):
         self.cache = {}
@@ -20,7 +18,7 @@ class DnsCache:
         return None
 
     def getInstance():
-        if DnsCache._instance == None:
+        if DnsCache._instance is None:
             DnsCache._instance = DnsCache()
 
         return DnsCache._instance

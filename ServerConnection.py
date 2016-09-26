@@ -21,27 +21,27 @@ import logging, re, string, random, zlib, gzip, StringIO
 from twisted.web.http import HTTPClient
 from URLMonitor import URLMonitor
 
-class ServerConnection(HTTPClient):
 
+class ServerConnection(HTTPClient):
     ''' The server connection is where we do the bulk of the stripping.  Everything that
     comes back is examined.  The headers we dont like are removed, and the links are stripped
     from HTTPS to HTTP.
     '''
 
-    urlExpression     = re.compile(r"(https://[\w\d:#@%/;$()~_?\+-=\\\.&]*)", re.IGNORECASE)
-    urlType           = re.compile(r"https://", re.IGNORECASE)
-    urlExplicitPort   = re.compile(r'https://([a-zA-Z0-9.]+):[0-9]+/',  re.IGNORECASE)
+    urlExpression = re.compile(r"(https://[\w\d:#@%/;$()~_?\+-=\\\.&]*)", re.IGNORECASE)
+    urlType = re.compile(r"https://", re.IGNORECASE)
+    urlExplicitPort = re.compile(r'https://([a-zA-Z0-9.]+):[0-9]+/', re.IGNORECASE)
 
     def __init__(self, command, uri, postData, headers, client):
-        self.command          = command
-        self.uri              = uri
-        self.postData         = postData
-        self.headers          = headers
-        self.client           = client
-        self.urlMonitor       = URLMonitor.getInstance()
-        self.isImageRequest   = False
-        self.isCompressed     = False
-        self.contentLength    = None
+        self.command = command
+        self.uri = uri
+        self.postData = postData
+        self.headers = headers
+        self.client = client
+        self.urlMonitor = URLMonitor.getInstance
+        self.isImageRequest = False
+        self.isCompressed = False
+        self.contentLength = None
         self.shutdownComplete = False
 
     def getLogLevel(self):
@@ -51,7 +51,7 @@ class ServerConnection(HTTPClient):
         return "POST"
 
     def sendRequest(self):
-        logging.log(self.getLogLevel(), "Sending Request: %s %s"  % (self.command, self.uri))
+        logging.log(self.getLogLevel(), "Sending Request: %s %s" % (self.command, self.uri))
         self.sendCommand(self.command, self.uri)
 
     def sendHeaders(self):
@@ -69,8 +69,8 @@ class ServerConnection(HTTPClient):
         logging.log(self.getLogLevel(), "HTTP connection made.")
         self.sendRequest()
         self.sendHeaders()
-        
-        if (self.command == 'POST'):
+
+        if self.command == 'POST':
             self.sendPostData()
 
     def handleStatus(self, version, code, message):
@@ -80,56 +80,56 @@ class ServerConnection(HTTPClient):
     def handleHeader(self, key, value):
         logging.log(self.getLogLevel(), "Got server header: %s:%s" % (key, value))
 
-        if (key.lower() == 'location'):
+        if key.lower() == 'location':
             value = self.replaceSecureLinks(value)
 
-        if (key.lower() == 'content-type'):
-            if (value.find('image') != -1):
+        if key.lower() == 'content-type':
+            if value.find('image') != -1:
                 self.isImageRequest = True
                 logging.debug("Response is image content, not scanning...")
 
-        if (key.lower() == 'content-encoding'):
-            if (value.find('gzip') != -1):
+        if key.lower() == 'content-encoding':
+            if value.find('gzip') != -1:
                 logging.debug("Response is compressed...")
                 self.isCompressed = True
-        elif (key.lower() == 'content-length'):
+        elif key.lower() == 'content-length':
             self.contentLength = value
-        elif (key.lower() == 'set-cookie'):
+        elif key.lower() == 'set-cookie':
             self.client.responseHeaders.addRawHeader(key, value)
         else:
             self.client.setHeader(key, value)
 
     def handleEndHeaders(self):
-       if (self.isImageRequest and self.contentLength != None):
-           self.client.setHeader("Content-Length", self.contentLength)
+        if self.isImageRequest and self.contentLength != None:
+            self.client.setHeader("Content-Length", self.contentLength)
 
-       if self.length == 0:
-           self.shutdown()
-                        
+        if self.length == 0:
+            self.shutdown()
+
     def handleResponsePart(self, data):
-        if (self.isImageRequest):
+        if self.isImageRequest:
             self.client.write(data)
         else:
             HTTPClient.handleResponsePart(self, data)
 
     def handleResponseEnd(self):
-        if (self.isImageRequest):
+        if self.isImageRequest:
             self.shutdown()
         else:
             HTTPClient.handleResponseEnd(self)
 
     def handleResponse(self, data):
-        if (self.isCompressed):
+        if self.isCompressed:
             logging.debug("Decompressing content...")
             data = gzip.GzipFile('', 'rb', 9, StringIO.StringIO(data)).read()
-            
+
         logging.log(self.getLogLevel(), "Read from server:\n" + data)
 
         data = self.replaceSecureLinks(data)
 
-        if (self.contentLength != None):
+        if self.contentLength is not None:
             self.client.setHeader('Content-Length', len(data))
-        
+
         self.client.write(data)
         self.shutdown()
 
@@ -153,5 +153,3 @@ class ServerConnection(HTTPClient):
             self.shutdownComplete = True
             self.client.finish()
             self.transport.loseConnection()
-
-
