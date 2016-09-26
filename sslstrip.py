@@ -15,17 +15,31 @@ class Setting:
     def __exec_shell(command):
         return os.popen(command).read()
 
-    def enable_ip_forwarding(self):
-        self.__exec_shell('echo "1" > /proc/sys/net/ipv4/ip_forward')
+    @classmethod
+    def _enable_ip_forwarding(cls):
+        cls.__exec_shell('echo "1" > /proc/sys/net/ipv4/ip_forward')
 
-    def disable_ip_forwarding(self):
-        self.__exec_shell('echo "0" > /proc/sys/net/ipv4/ip_forward')
+    @classmethod
+    def _disable_ip_forwarding(cls):
+        cls.__exec_shell('echo "0" > /proc/sys/net/ipv4/ip_forward')
 
-    def enable_intercept_http_packet(self):
-        self.__exec_shell('iptables -t nat -A PREROUTING -p tcp --destination-port 80 -j REDIRECT --to-port')
+    @classmethod
+    def _enable_intercept_http_packet(cls):
+        cls.__exec_shell('iptables -t nat -A PREROUTING -p tcp --destination-port 80 -j REDIRECT --to-port')
 
-    def disable_intercept_http_packet(self):
-        self.__exec_shell('iptables -t nat -D PREROUTING -p tcp --destination-port 80 -j REDIRECT --to-port')
+    @classmethod
+    def _disable_intercept_http_packet(cls):
+        cls.__exec_shell('iptables -t nat -D PREROUTING -p tcp --destination-port 80 -j REDIRECT --to-port')
+
+    @classmethod
+    def on(cls):
+        cls._enable_ip_forwarding()
+        cls._enable_intercept_http_packet()
+
+    @classmethod
+    def off(cls):
+        cls._disable_ip_forwarding()
+        cls._disable_intercept_http_packet()
 
 
 def main():
@@ -34,6 +48,8 @@ def main():
     else:
         print("We need root permission")
         exit()
+
+    Setting.on()
 
     # Using Twisted
     logging.basicConfig(level=logging.WARNING, format='%(asctime)s %(message)s',
