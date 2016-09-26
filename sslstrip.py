@@ -21,6 +21,12 @@ class Setting:
     def disable_ip_forwarding(self):
         self.__exec_shell('echo "0" > /proc/sys/net/ipv4/ip_forward')
 
+    def enable_intercept_http_packet(self):
+        self.__exec_shell('iptables -t nat -A PREROUTING -p tcp --destination-port 80 -j REDIRECT --to-port')
+
+    def disable_intercept_http_packet(self):
+        self.__exec_shell('iptables -t nat -D PREROUTING -p tcp --destination-port 80 -j REDIRECT --to-port')
+
 
 def main():
     if 0 == os.getuid():
