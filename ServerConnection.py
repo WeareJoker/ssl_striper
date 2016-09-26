@@ -16,9 +16,17 @@
 # USA
 #
 
-import logging, re, string, random, zlib, gzip, StringIO
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
+
+import gzip
+import logging
+import re
 
 from twisted.web.http import HTTPClient
+
 from URLMonitor import URLMonitor
 
 
@@ -121,7 +129,7 @@ class ServerConnection(HTTPClient):
     def handleResponse(self, data):
         if self.isCompressed:
             logging.debug("Decompressing content...")
-            data = gzip.GzipFile('', 'rb', 9, StringIO.StringIO(data)).read()
+            data = gzip.GzipFile('', 'rb', 9, StringIO(data)).read()
 
         logging.log(self.getLogLevel(), "Read from server:\n" + data)
 

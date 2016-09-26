@@ -16,23 +16,21 @@
 # USA
 #
 
-import urlparse, logging, os, sys, random
+import logging
+import os
+import sys
 
-from twisted.web.http import Request
-from twisted.web.http import HTTPChannel
-from twisted.web.http import HTTPClient
-
-from twisted.internet import ssl
 from twisted.internet import defer
 from twisted.internet import reactor
-from twisted.internet.protocol import ClientFactory
+from twisted.internet import ssl
+from twisted.web.http import Request
 
-from ServerConnectionFactory import ServerConnectionFactory
-from ServerConnection import ServerConnection
-from SSLServerConnection import SSLServerConnection
-from URLMonitor import URLMonitor
 from CookieCleaner import CookieCleaner
 from DnsCache import DnsCache
+from SSLServerConnection import SSLServerConnection
+from ServerConnection import ServerConnection
+from ServerConnectionFactory import ServerConnectionFactory
+from URLMonitor import URLMonitor
 
 
 class ClientRequest(Request):

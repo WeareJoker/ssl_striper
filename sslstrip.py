@@ -1,10 +1,8 @@
-#!/usr/bin/env python
-
 """sslstrip is a MITM tool that implements Moxie Marlinspike's SSL stripping attacks."""
- 
+
 __author__ = "Moxie Marlinspike"
-__email__  = "moxie@thoughtcrime.org"
-__license__= """
+__email__ = "moxie@thoughtcrime.org"
+__license__ = """
 Copyright (c) 2004-2009 Moxie Marlinspike <moxie@thoughtcrime.org>
  
 This program is free software; you can redistribute it and/or
@@ -24,16 +22,19 @@ USA
 
 """
 
-from twisted.web import http
-from twisted.internet import reactor
+import getopt
+import logging
+import sys
 
+from twisted.internet import reactor
+from twisted.web import http
+
+from CookieCleaner import CookieCleaner
 from StrippingProxy import StrippingProxy
 from URLMonitor import URLMonitor
-from CookieCleaner import CookieCleaner
-
-import sys, getopt, logging, traceback, string, os
 
 gVersion = "0.9"
+
 
 def usage():
     print("\nsslstrip " + gVersion + " by Moxie Marlinspike")
@@ -49,16 +50,17 @@ def usage():
     print("-h                                print this help message.")
     print("")
 
+
 def parseOptions(argv):
-    logFile      = 'sslstrip.log'
-    logLevel     = logging.WARNING
-    listenPort   = 10000
+    logFile = 'sslstrip.log'
+    logLevel = logging.WARNING
+    listenPort = 10000
     spoofFavicon = False
     killSessions = False
-    
-    try:                                
-        opts, args = getopt.getopt(argv, "hw:l:psafk", 
-                                   ["help", "write=", "post", "ssl", "all", "listen=", 
+
+    try:
+        opts, args = getopt.getopt(argv, "hw:l:psafk",
+                                   ["help", "write=", "post", "ssl", "all", "listen=",
                                     "favicon", "killsessions"])
 
         for opt, arg in opts:
@@ -81,31 +83,32 @@ def parseOptions(argv):
                 killSessions = True
 
         return logFile, logLevel, listenPort, spoofFavicon, killSessions
-                    
-    except getopt.GetoptError:           
-        usage()                          
-        sys.exit(2)                         
+
+    except getopt.GetoptError:
+        usage()
+        sys.exit(2)
+
 
 def main(argv):
     (logFile, logLevel, listenPort, spoofFavicon, killSessions) = parseOptions(argv)
-        
+
     logging.basicConfig(level=logLevel, format='%(asctime)s %(message)s',
                         filename=logFile, filemode='w')
-
-    URLMonitor.getInstance.setFaviconSpoofing(spoofFavicon)
     CookieCleaner.getInstance().setEnabled(killSessions)
 
-    strippingFactory              = http.HTTPFactory(timeout=10)
-    strippingFactory.protocol     = StrippingProxy
+    strippingFactory = http.HTTPFactory(timeout=10)
+    strippingFactory.protocol = StrippingProxy
 
     reactor.listenTCP(int(listenPort), strippingFactory)
-                
-    print("\nsslstrip " + gVersion + " by Moxie Marlinspike running..."
+
+    print("\nsslstrip " + gVersion + " by Moxie Marlinspike running...")
 
     reactor.run()
 
+
 def _main():
     main(sys.argv[1:])
+
 
 if __name__ == '__main__':
     _main()
