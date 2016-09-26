@@ -80,7 +80,7 @@ def parseOptions(argv):
             elif opt in ("-k", "--killsessions"):
                 killSessions = True
 
-        return (logFile, logLevel, listenPort, spoofFavicon, killSessions)
+        return logFile, logLevel, listenPort, spoofFavicon, killSessions
                     
     except getopt.GetoptError:           
         usage()                          
