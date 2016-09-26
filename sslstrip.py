@@ -31,7 +31,6 @@ from twisted.web import http
 
 from CookieCleaner import CookieCleaner
 from StrippingProxy import StrippingProxy
-from URLMonitor import URLMonitor
 
 gVersion = "0.9"
 
