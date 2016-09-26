@@ -25,11 +25,11 @@ class Setting:
 
     @classmethod
     def _enable_intercept_http_packet(cls):
-        cls.__exec_shell('iptables -t nat -A PREROUTING -p tcp --destination-port 80 -j REDIRECT --to-port')
+        cls.__exec_shell('iptables -t nat -A PREROUTING -p tcp --destination-port 80 -j REDIRECT --to-port 10000')
 
     @classmethod
     def _disable_intercept_http_packet(cls):
-        cls.__exec_shell('iptables -t nat -D PREROUTING -p tcp --destination-port 80 -j REDIRECT --to-port')
+        cls.__exec_shell('iptables -t nat -D PREROUTING -p tcp --destination-port 80 -j REDIRECT --to-port 10000 ')
 
     @classmethod
     def on(cls):
@@ -62,7 +62,11 @@ def main():
 
     print("Running")
 
-    reactor.run()
+    try:
+        reactor.run()
+    except KeyboardInterrupt:
+        print("Bye~")
+        Setting.off()
 
 
 if __name__ == '__main__':
