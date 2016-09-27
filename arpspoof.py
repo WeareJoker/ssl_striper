@@ -335,7 +335,7 @@ class Relay:
 
 def main():
     # victim_ip = input("Victim IP: ")
-    arp = ARP(argv[1])
+    arp = ARP(victim=argv[1])
 
     # 리눅스 상의 Relay를 사용하므로,
     # r = Relay(arp)
