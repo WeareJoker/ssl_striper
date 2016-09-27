@@ -5,15 +5,15 @@ Writer Kcrong
 python3 main.py [victim ip]
 """
 
-from os import popen
 import re
 import subprocess
 import time
-from sys import argv
-from binascii import hexlify, unhexlify
+from binascii import hexlify
 from multiprocessing import Process
+from os import popen
 from socket import *
 from struct import unpack
+from sys import argv
 
 from packet_header_define import *
 
