@@ -73,7 +73,7 @@ class ARP:
         self.name, self.ip, self.mac = self._get_my_interface_info()
         # self.target_arp_refresh_interval = self.calc_arp_refresh()
         self.target_arp_refresh_interval = 3
-        print("Done. %f" % self.target_arp_refresh_interval)
+        print("Finish calc Target's ARP refresh time. %f" % self.target_arp_refresh_interval)
         self.victim_mac = self._get_mac(self.victim_ip)
         print("Get Victim's MAC address")
         self.gateway_mac = self._get_mac(self.gateway_ip)
