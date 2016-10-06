@@ -96,19 +96,28 @@ class ServerConnection(HTTPClient):
                 self.isImageRequest = True
                 logging.debug("Response is image content, not scanning...")
 
-        if key.lower() == 'content-encoding':
+        def content_encoding():
             if value.find('gzip') != -1:
-                logging.debug("Response is compressed...")
+                logging.debug('Response is compressed...')
                 self.isCompressed = True
-        elif key.lower() == 'content-length':
+
+        def content_length():
             self.contentLength = value
-        elif key.lower() == 'set-cookie':
+
+        def set_cookie():
             self.client.responseHeaders.addRawHeader(key, value)
-        else:
+
+        try:
+            {
+                'content-encoding': content_encoding,
+                'content-length': content_length,
+                'set-cookie': set_cookie
+            }[key.lower()]()
+        except KeyError:
             self.client.setHeader(key, value)
 
     def handleEndHeaders(self):
-        if self.isImageRequest and self.contentLength != None:
+        if self.isImageRequest and self.contentLength is not None:
             self.client.setHeader("Content-Length", self.contentLength)
 
         if self.length == 0:
