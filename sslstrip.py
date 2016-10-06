@@ -9,6 +9,16 @@ from multiprocessing import Process
 
 from StrippingProxy import StrippingProxy
 
+import atexit
+
+
+def exit_handler():
+    Setting.off()
+    print('Bye~')
+
+
+atexit.register(exit_handler)
+
 
 class Setting:
     def __init__(self):
@@ -57,8 +67,9 @@ def main():
         print("We need root permission")
         exit()
 
-    victim_ip = input("Victim: ")
-    arp_process = Process(target=run_arp, args=(victim_ip, ))
+    # victim_ip = input("Victim: ")
+    victim_ip = '192.168.0.39'
+    arp_process = Process(target=run_arp, args=(victim_ip,))
     arp_process.start()
 
     Setting.on()
