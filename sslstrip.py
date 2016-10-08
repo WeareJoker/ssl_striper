@@ -68,9 +68,9 @@ def main():
         exit()
 
     # victim_ip = input("Victim: ")
-    victim_ip = '192.168.0.39'
-    arp_process = Process(target=run_arp, args=(victim_ip,))
-    arp_process.start()
+    # victim_ip = '192.168.0.39'
+    # arp_process = Process(target=run_arp, args=(victim_ip,))
+    # arp_process.start()
 
     Setting.on()
 
@@ -91,7 +91,7 @@ def main():
         print("Bye~")
         Setting.off()
         # escape process
-        arp_process.join()
+        # arp_process.join()
 
 
 if __name__ == '__main__':

