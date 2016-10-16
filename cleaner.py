@@ -15,8 +15,7 @@ signal.signal(signal.SIGTERM, cleaner)
 def error_clean(func):
     def wrapper(*args, **kwargs):
         try:
-            result = func(*args, **kwargs)
-            return result
+            return func(*args, **kwargs)
         except KeyboardInterrupt:
             cleaner()
             exit()
